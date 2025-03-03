@@ -25,15 +25,16 @@ price_feed: AggregatorV3Interface
 #OWNER: public(immutable(address))
 #PRECISION: constant(uint256) = 1*(10**18)
 
+# 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
 
 # Storage
 funders: public(DynArray[address, 1000])
 funder_to_amount_funded: public(HashMap[address, uint256])
 
 @deploy
-def __init__(price_feed_address: address):
-    self.minimum_usd = 5 
-    self.price_feed = AggregatorV3Interface(price_feed_address)
+def __init__(price_feed: address):
+    self.minimum_usd = as_wei_value(5, "ether")
+    self.price_feed = AggregatorV3Interface(price_feed)
 
 #PRICE_FEED = AggregatorV3Interface(price_feed)
 
@@ -43,8 +44,10 @@ def __init__(price_feed_address: address):
 @payable
 def fund():
     #self._fund()
+    usd_value_of_eth: uint256 = self._get_eth_to_usd_rate(msg.value)
+    assert usd_value_of_eth >= self.minimum_usd, "You must spend more ETH!"
 
-    assert msg.value == as_wei_value(1, "ether"), "You must spend more ETH!"
+    #assert msg.value == as_wei_value(1, "ether"), "You must spend more ETH!"
 
 #@internal
 #@payable
@@ -61,5 +64,23 @@ def withdraw():
     pass 
 
 @internal 
-def _get_eth_to_usd_rate():
+@view
+def _get_eth_to_usd_rate(eth_amount: uint256) -> uint256:
+    
     price: int256 = staticcall self.price_feed.latestAnswer()
+    eth_price: uint256 = (convert(price, uint256)) * (10**18)
+    eth_amount_in_usd: uint256 = (eth_amount * eth_price) // (1 * (10**18))
+    return eth_amount_in_usd
+
+
+@external 
+@view
+def get_eth_to_usd_rate(eth_amount: uint256) -> uint256:
+    return self._get_eth_to_usd_rate(eth_amount)
+
+# Integer Division
+@external
+@view
+def divide_me(number: uint256) -> uint256:
+    return number//3
+
