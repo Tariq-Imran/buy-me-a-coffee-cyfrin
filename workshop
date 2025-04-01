@@ -1,0 +1,20 @@
+
+Workshop
+Get a good idea for "how good" your AI is. Maybe shop around for an AI you like. 
+Ask them some softball questions to figure out how smart they are. Like:
+
+1. Make a minimal vyper contract
+2. What's the difference between a dynamic array and a fixed sized array?
+3. Here is some vyper code:
+@external
+def add_person(name: String[100], favorite_number: uint256):
+    new_person: Person = Person(favorite_number = favorite_number, name = name)
+    self.list_of_people[self.list_of_people_index] = new_person
+    self.list_of_numbers[self.list_of_people_index] = favorite_number
+    self.list_of_people_index += 1
+    self.name_to_favorite_number[name] = favorite_number
+
+What does it do?
+
+4. Is this vyper code safe?
+send(OWNER, self.balance)
